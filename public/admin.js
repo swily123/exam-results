@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const response = await fetch('http://localhost:3000/users');
+    const response = await fetch('https://myegeresults.onrender.com/users');
     if (!response.ok) {
       throw new Error('Ошибка при получении данных');
     }
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const deleteButton = document.createElement('button');
       deleteButton.textContent = 'Удалить';
       deleteButton.addEventListener('click', () => {
-        fetch(`http://localhost:3000/delete-user/${user.ip}`, { method: 'DELETE' })
+        fetch(`https://myegeresults.onrender.com/delete-user/${user.ip}`, { method: 'DELETE' })
           .then(() => location.reload());
       });
 
@@ -105,7 +105,7 @@ function openEditModal(user) {
     e.preventDefault();
     const updatedResults = JSON.parse(form.querySelector('#results').value);
 
-    await fetch(`http://localhost:3000/update-results/${user.ip}`, {
+    await fetch(`https://myegeresults.onrender.com/update-results/${user.ip}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ results: updatedResults })
