@@ -9,7 +9,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Разрешаем все домены (для тестирования)
-app.use(cors());
+const corsOptions = {
+  origin: 'https://exam-results.onrender.com',  // Замените на ваш URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // Подключение к базе данных SQLite
 const db = new sqlite3.Database('./database.db');

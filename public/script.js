@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Получаем IP-адрес пользователя через прокси
-    const ipResponse = await fetch('/get-ip');
+    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip'); 
     if (!ipResponse.ok) {
       throw new Error('Не удалось получить IP-адрес');
     }
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ip = ipData.ip;
 
     // Проверяем, есть ли пользователь в базе данных
-    const userResponse = await fetch(`http://localhost:3000/results/${ip}`);
+    const userResponse = await fetch(`https://exam-results.onrender.com/results/${ip}`);
     if (userResponse.ok) {
       const userData = await userResponse.json();
 
