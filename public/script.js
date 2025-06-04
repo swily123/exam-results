@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Получаем IP-адрес пользователя через прокси
-    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip'); 
+    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip');  // Полный URL
     if (!ipResponse.ok) {
       throw new Error('Не удалось получить IP-адрес');
     }
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ip = ipData.ip;
 
     // Проверяем, есть ли пользователь в базе данных
-    const userResponse = await fetch(`https://exam-results.onrender.com/results/${ip}`);
+    const userResponse = await fetch(`https://exam-results.onrender.com/results/${ip}`);  // Полный URL
     if (userResponse.ok) {
       const userData = await userResponse.json();
 
@@ -57,7 +57,7 @@ document.getElementById('examForm').addEventListener('submit', async function (e
 
   // Получаем IP-адрес пользователя через прокси
   try {
-    const ipResponse = await fetch('/get-ip'); // Используем наш прокси-маршрут
+    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip');  // Полный URL
     if (!ipResponse.ok) {
       throw new Error('Не удалось получить IP-адрес');
     }
@@ -90,7 +90,7 @@ document.getElementById('examForm').addEventListener('submit', async function (e
     console.log('Данные сохранены в localStorage:', examData);
 
     // Отправляем данные на сервер
-    const serverResponse = await fetch('http://localhost:3000/register', {
+    const serverResponse = await fetch('https://exam-results.onrender.com/register',  { // Полный URL
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -114,45 +114,4 @@ document.getElementById('examForm').addEventListener('submit', async function (e
     console.error('Ошибка:', error);
     alert('Произошла ошибка. Пожалуйста, попробуйте снова.');
   }
-});
-
-// Добавление предметов
-document.getElementById('addSubject').addEventListener('click', function () {
-  const container = document.getElementById('subjectsContainer');
-  const rows = container.querySelectorAll('.subject-row');
-  if (rows.length >= 5) return;
-
-  const newRow = document.createElement('div');
-  newRow.classList.add('subject-row');
-
-  const label = document.createElement('label');
-  label.textContent = 'Предмет:';
-  label.setAttribute('for', `subject${rows.length + 1}`);
-
-  const newInput = document.createElement('input');
-  newInput.type = 'text';
-  newInput.id = `subject${rows.length + 1}`;
-  newInput.name = `subject${rows.length + 1}`;
-  newInput.setAttribute('list', 'subjectList');
-
-  const removeButton = document.createElement('button');
-  removeButton.type = 'button';
-  removeButton.textContent = 'Удалить';
-  removeButton.classList.add('removeSubject');
-
-  removeButton.addEventListener('click', function () {
-    container.removeChild(newRow);
-  });
-
-  newRow.appendChild(label);
-  newRow.appendChild(newInput);
-  newRow.appendChild(removeButton);
-  container.appendChild(newRow);
-});
-
-// Удаление первоначального предмета
-document.querySelectorAll('.removeSubject').forEach(button => {
-  button.addEventListener('click', function () {
-    this.closest('.subject-row').remove();
-  });
 });
