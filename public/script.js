@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Получаем IP-адрес пользователя через прокси
-    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip');  // Полный URL
+    const ipResponse = await fetch('https://myegeresults.onrender.com/get-ip');  // Полный URL
     if (!ipResponse.ok) {
       throw new Error('Не удалось получить IP-адрес');
     }
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ip = ipData.ip;
 
     // Проверяем, есть ли пользователь в базе данных
-    const userResponse = await fetch(`https://exam-results.onrender.com/results/${ip}`);  // Полный URL
+    const userResponse = await fetch(`https://myegeresults.onrender.com/results/${ip}`);  // Полный URL
     if (userResponse.ok) {
       const userData = await userResponse.json();
 
@@ -57,7 +57,7 @@ document.getElementById('examForm').addEventListener('submit', async function (e
 
   // Получаем IP-адрес пользователя через прокси
   try {
-    const ipResponse = await fetch('https://exam-results.onrender.com/get-ip');  // Полный URL
+    const ipResponse = await fetch('https://myegeresults.onrender.com/get-ip');  // Полный URL
     if (!ipResponse.ok) {
       throw new Error('Не удалось получить IP-адрес');
     }
@@ -90,7 +90,7 @@ document.getElementById('examForm').addEventListener('submit', async function (e
     console.log('Данные сохранены в localStorage:', examData);
 
     // Отправляем данные на сервер
-    const serverResponse = await fetch('https://exam-results.onrender.com/register',  { // Полный URL
+    const serverResponse = await fetch('https://myegeresults.onrender.com/register',  { // Полный URL
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
