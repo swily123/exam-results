@@ -1,11 +1,15 @@
 const express = require('express');
-const axios = require('axios'); // Установите axios: npm install axios
+const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+const cors = require('cors'); // Подключаем CORS
 const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Разрешаем все домены (для тестирования)
+app.use(cors());
 
 // Подключение к базе данных SQLite
 const db = new sqlite3.Database('./database.db');
@@ -95,28 +99,6 @@ app.get('/users', (req, res) => {
   });
 });
 
-// Маршрут для обновления результатов пользователя
-app.put('/update-results/:ip', (req, res) => {
-  const ip = req.params.ip;
-  const { results } = req.body;
-
-  db.run('UPDATE users SET results = ? WHERE ip = ?', [JSON.stringify(results), ip], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ message: 'Results updated successfully' });
-  });
-});
-
-// Корневой маршрут
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-
 // Маршрут для получения результатов пользователя по IP
 app.get('/results/:ip', (req, res) => {
   const ip = req.params.ip;
@@ -131,4 +113,13 @@ app.get('/results/:ip', (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   });
+});
+
+// Корневой маршрут
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
