@@ -1,158 +1,125 @@
-document.addEventListener('DOMContentLoaded', async () => {
+const express = require('express');
+const axios = require('axios');
+const sqlite3 = require('sqlite3').verbose();
+const bodyParser = require('body-parser');
+const cors = require('cors'); // Подключаем CORS
+const path = require('path');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Разрешаем все домены (для тестирования)
+app.use(cors());
+
+// Подключение к базе данных SQLite
+const db = new sqlite3.Database('./database.db');
+
+// Создание таблицы для пользователей
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip TEXT,
+      name TEXT,
+      lastName TEXT,
+      middleName TEXT,
+      mathType TEXT,
+      subjects TEXT,
+      results TEXT
+    )
+  `);
+});
+
+app.use(bodyParser.json());
+
+// Обслуживание статических файлов (HTML, CSS, JS)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Маршрут для получения IP-адреса через прокси
+app.get('/get-ip', async (req, res) => {
   try {
-    // Получаем IP-адрес пользователя через прокси
-    const ipResponse = await fetch('/get-ip');
-    if (!ipResponse.ok) {
-      throw new Error('Не удалось получить IP-адрес');
-    }
-    const ipData = await ipResponse.json();
-    const ip = ipData.ip;
-
-    // Проверяем, есть ли пользователь в базе данных
-    const userResponse = await fetch(`http://localhost:3000/results/${ip}`);
-    if (userResponse.ok) {
-      const userData = await userResponse.json();
-
-      // Сохраняем данные в localStorage
-      localStorage.setItem('examData', JSON.stringify({
-        subjects: JSON.parse(userData.subjects),
-        results: JSON.parse(userData.results)
-      }));
-
-      // Перенаправляем на страницу загрузки
-      window.location.href = 'loading.html';
-      return;
-    }
-
-    // Если пользователя нет в базе данных, показываем форму
-    console.log('Пользователь не найден в базе данных. Показываем форму.');
+    const response = await axios.get('https://api.ipify.org?format=json');
+    const ip = response.data.ip;
+    res.json({ ip });
   } catch (error) {
-    console.error('Ошибка:', error);
-    alert('Произошла ошибка. Пожалуйста, попробуйте снова.');
+    console.error('Ошибка при получении IP:', error.message);
+    res.status(500).json({ error: 'Не удалось получить IP-адрес' });
   }
 });
 
-document.getElementById('examForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+// Маршрут для регистрации нового пользователя
+app.post('/register', (req, res) => {
+  const { ip, name, lastName, middleName, mathType, subjects, results } = req.body;
 
-  // Проверяем, что все добавленные предметы заполнены
-  const subjectInputs = document.querySelectorAll('#subjectsContainer input[type="text"]');
-  let allSubjectsFilled = true;
-
-  subjectInputs.forEach(input => {
-    if (!input.value.trim()) {
-      allSubjectsFilled = false;
-      alert('Пожалуйста, заполните или удалите все добавленные предметы.');
-    }
-  });
-
-  if (!allSubjectsFilled) return;
-
-  // Собираем данные формы
-  const formData = new FormData(this);
-  const data = {};
-  formData.forEach((value, key) => {
-    data[key] = value;
-  });
-
-  // Получаем IP-адрес пользователя через прокси
-  try {
-    const ipResponse = await fetch('/get-ip'); // Используем наш прокси-маршрут
-    if (!ipResponse.ok) {
-      throw new Error('Не удалось получить IP-адрес');
-    }
-    const ipData = await ipResponse.json();
-    const ip = ipData.ip;
-
-    // Создаём новые данные для нового пользователя
-    const subjects = ['Русский язык'];
-    if (data.mathType) {
-      subjects.push(data.mathType);
-    }
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith('subject') && value) {
-        subjects.push(value);
+  db.run(
+    'INSERT INTO users (ip, name, lastName, middleName, mathType, subjects, results) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [ip, name, lastName, middleName, mathType, JSON.stringify(subjects), JSON.stringify(results)],
+    function (err) {
+      if (err) {
+        console.error('Ошибка при сохранении данных:', err.message);
+        return res.status(500).json({ error: err.message });
       }
+      res.json({ message: 'User registered successfully' });
     }
-
-    const results = {};
-    subjects.forEach(subject => {
-      if (subject === 'Математика (базовая)') {
-        results[subject] = Math.floor(Math.random() * 6); // Оценка от 0 до 5
-      } else {
-        results[subject] = Math.floor(Math.random() * 91) + 10; // Баллы от 10 до 100
-      }
-    });
-
-    // Сохраняем данные в localStorage
-    const examData = { subjects, results };
-    localStorage.setItem('examData', JSON.stringify(examData));
-    console.log('Данные сохранены в localStorage:', examData);
-
-    // Отправляем данные на сервер
-    const serverResponse = await fetch('http://localhost:3000/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ip,
-        name: data.firstName,
-        lastName: data.lastName,
-        middleName: data.middleName || '',
-        mathType: data.mathType,
-        subjects,
-        results
-      })
-    });
-
-    if (!serverResponse.ok) {
-      throw new Error('Ошибка при отправке данных на сервер');
-    }
-
-    // Перенаправляем на страницу загрузки
-    window.location.href = 'loading.html';
-  } catch (error) {
-    console.error('Ошибка:', error);
-    alert('Произошла ошибка. Пожалуйста, попробуйте снова.');
-  }
+  );
 });
 
-// Добавление предметов
-document.getElementById('addSubject').addEventListener('click', function () {
-  const container = document.getElementById('subjectsContainer');
-  const rows = container.querySelectorAll('.subject-row');
-  if (rows.length >= 5) return;
+// Маршрут для обновления результатов пользователя
+app.put('/update-results/:ip', (req, res) => {
+  const ip = req.params.ip;
+  const { results } = req.body;
 
-  const newRow = document.createElement('div');
-  newRow.classList.add('subject-row');
-
-  const label = document.createElement('label');
-  label.textContent = 'Предмет:';
-  label.setAttribute('for', `subject${rows.length + 1}`);
-
-  const newInput = document.createElement('input');
-  newInput.type = 'text';
-  newInput.id = `subject${rows.length + 1}`;
-  newInput.name = `subject${rows.length + 1}`;
-  newInput.setAttribute('list', 'subjectList');
-
-  const removeButton = document.createElement('button');
-  removeButton.type = 'button';
-  removeButton.textContent = 'Удалить';
-  removeButton.classList.add('removeSubject');
-
-  removeButton.addEventListener('click', function () {
-    container.removeChild(newRow);
+  db.run('UPDATE users SET results = ? WHERE ip = ?', [JSON.stringify(results), ip], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'Results updated successfully' });
   });
-
-  newRow.appendChild(label);
-  newRow.appendChild(newInput);
-  newRow.appendChild(removeButton);
-  container.appendChild(newRow);
 });
 
-// Удаление первоначального предмета
-document.querySelectorAll('.removeSubject').forEach(button => {
-  button.addEventListener('click', function () {
-    this.closest('.subject-row').remove();
+// Маршрут для удаления пользователя
+app.delete('/delete-user/:ip', (req, res) => {
+  const ip = req.params.ip;
+
+  db.run('DELETE FROM users WHERE ip = ?', [ip], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'User deleted successfully' });
   });
+});
+
+// Маршрут для получения списка всех пользователей
+app.get('/users', (req, res) => {
+  db.all('SELECT * FROM users', [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+// Маршрут для получения результатов пользователя по IP
+app.get('/results/:ip', (req, res) => {
+  const ip = req.params.ip;
+
+  db.get('SELECT * FROM users WHERE ip = ?', [ip], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (row) {
+      res.json(row);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  });
+});
+
+// Корневой маршрут
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
