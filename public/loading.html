@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Загрузка</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+
+  .loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .messages {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .message {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .message.visible {
+    opacity: 1;
+  }
+
+  /* Мобильная адаптация */
+  @media (max-width: 768px) {
+    .loader {
+      width: 50px;
+      height: 50px;
+      border-width: 6px;
+    }
+
+    .message {
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="loader"></div>
+  <div class="messages">
+    <div class="message">Проверяем ваши данные...</div>
+    <div class="message">Проверка всех ваших экзаменов экспертной комиссии...</div>
+    <div class="message">Занижаем баллы за вторую часть...</div>
+  </div>
+  <script>
+    const messages = document.querySelectorAll('.message');
+    let currentIndex = 0;
+
+    function showNextMessage() {
+      console.log(`Текущий индекс: ${currentIndex}, всего сообщений: ${messages.length}`);
+      if (currentIndex < messages.length) {
+        messages[currentIndex].classList.add('visible');
+        currentIndex++;
+      }
+
+      // Если все сообщения показаны, запускаем таймер для перенаправления
+      if (currentIndex === messages.length) {
+        console.log('Все сообщения показаны. Перенаправление...');
+        setTimeout(() => {
+          console.log('Перенаправление на res.html...');
+          window.location.replace('res.html');
+        }, 1000);
+      }
+    }
+
+    // Показываем сообщения каждые 2 секунды
+    const interval = setInterval(() => {
+      showNextMessage();
+      if (currentIndex >= messages.length) {
+        console.log('Очистка интервала.');
+        clearInterval(interval);
+      }
+    }, 2000);
+  </script>
+</body>
+</html>

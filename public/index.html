@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Проверка ЕГЭ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Проверка результатов ЕГЭ</h1>
+    <form id="examForm">
+      <label for="firstName">Имя:</label>
+      <input type="text" id="firstName" name="firstName" required>
+
+      <label for="lastName">Фамилия:</label>
+      <input type="text" id="lastName" name="lastName" required>
+
+      <label for="middleName">Отчество (опционально):</label>
+      <input type="text" id="middleName" name="middleName">
+
+      <label for="mathType">Математика:</label>
+      <select id="mathType" name="mathType" required>
+        <option value="Математика (профильная)">Профильная</option>
+        <option value="Математика (базовая)">Базовая</option>
+      </select>
+
+      <div id="subjectsContainer">
+        <div class="subject-row">
+          <label for="subject1">Предмет:</label>
+          <input type="text" id="subject1" name="subject1" list="subjectList">
+          <button type="button" class="removeSubject">Удалить</button>
+        </div>
+      </div>
+      <button type="button" id="addSubject">Добавить предмет</button>
+
+      <datalist id="subjectList">
+        <option value="Химия">
+        <option value="Физика">
+        <option value="Информатика">
+        <option value="Биология">
+        <option value="Обществознание">
+        <option value="История">
+      </datalist>
+
+      <button type="submit">Проверить результаты</button>
+    </form>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

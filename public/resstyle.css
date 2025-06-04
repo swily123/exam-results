@@ -1,0 +1,40 @@
+
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+
+  table {
+    width: 100%;
+    max-width: 500px;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f4f4f9;
+  }
+
+  /* Мобильная адаптация */
+  @media (max-width: 768px) {
+    table {
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 6px;
+    }
+  }
