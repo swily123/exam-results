@@ -115,3 +115,44 @@ document.getElementById('examForm').addEventListener('submit', async function (e
     alert('Произошла ошибка. Пожалуйста, попробуйте снова.');
   }
 });
+
+// Добавление предметов
+document.getElementById('addSubject').addEventListener('click', function () {
+  const container = document.getElementById('subjectsContainer');
+  const rows = container.querySelectorAll('.subject-row');
+  if (rows.length >= 5) return;
+
+  const newRow = document.createElement('div');
+  newRow.classList.add('subject-row');
+
+  const label = document.createElement('label');
+  label.textContent = 'Предмет:';
+  label.setAttribute('for', `subject${rows.length + 1}`);
+
+  const newInput = document.createElement('input');
+  newInput.type = 'text';
+  newInput.id = `subject${rows.length + 1}`;
+  newInput.name = `subject${rows.length + 1}`;
+  newInput.setAttribute('list', 'subjectList');
+
+  const removeButton = document.createElement('button');
+  removeButton.type = 'button';
+  removeButton.textContent = 'Удалить';
+  removeButton.classList.add('removeSubject');
+
+  removeButton.addEventListener('click', function () {
+    container.removeChild(newRow);
+  });
+
+  newRow.appendChild(label);
+  newRow.appendChild(newInput);
+  newRow.appendChild(removeButton);
+  container.appendChild(newRow);
+});
+
+// Удаление первоначального предмета
+document.querySelectorAll('.removeSubject').forEach(button => {
+  button.addEventListener('click', function () {
+    this.closest('.subject-row').remove();
+  });
+});
