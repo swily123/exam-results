@@ -15,36 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableBody = document.querySelector('#resultsTable tbody');
   tableBody.innerHTML = ''; // Очищаем таблицу
 
-  // Добавляем предмет "Математика"
-  const mathType = results['Математика (профильная)']
-    ? 'Математика (профильная)'
-    : 'Математика (базовая)';
-  const mathScore = results[mathType];
+  // Отображаем предметы в порядке массива subjects
+  subjects.forEach(subject => {
+    const row = document.createElement('tr');
+    const subjectCell = document.createElement('td');
+    const scoreCell = document.createElement('td');
 
-  const mathRow = document.createElement('tr');
-  const mathSubjectCell = document.createElement('td');
-  const mathScoreCell = document.createElement('td');
+    subjectCell.textContent = subject;
+    scoreCell.textContent = results[subject] || 'Нет данных';
 
-  mathSubjectCell.textContent = mathType;
-  mathScoreCell.textContent = mathScore;
-
-  mathRow.appendChild(mathSubjectCell);
-  mathRow.appendChild(mathScoreCell);
-  tableBody.appendChild(mathRow);
-
-  // Добавляем остальные предметы
-  for (const [subject, score] of Object.entries(results)) {
-    if (!subject.includes('Математика')) {
-      const row = document.createElement('tr');
-      const subjectCell = document.createElement('td');
-      const scoreCell = document.createElement('td');
-
-      subjectCell.textContent = subject;
-      scoreCell.textContent = score;
-
-      row.appendChild(subjectCell);
-      row.appendChild(scoreCell);
-      tableBody.appendChild(row);
-    }
-  }
+    row.appendChild(subjectCell);
+    row.appendChild(scoreCell);
+    tableBody.appendChild(row);
+  });
 });
