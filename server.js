@@ -9,13 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Разрешаем все домены (для тестирования)
-const corsOptions = {
-  origin: 'https://exam-results.onrender.com',  // Замените на ваш URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Подключение к базе данных SQLite
 const db = new sqlite3.Database('./database.db');
@@ -26,6 +20,7 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ip TEXT,
+      userAgent TEXT,
       name TEXT,
       lastName TEXT,
       middleName TEXT,
@@ -41,12 +36,19 @@ app.use(bodyParser.json());
 // Обслуживание статических файлов (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Маршрут для получения IP-адреса через прокси
-app.get('/get-ip', async (req, res) => {
+// Маршрут для получения IP-адреса и User-Agent через прокси
+app.get('/get-ip', (req, res) => {
   try {
-    const response = await axios.get('https://api.ipify.org?format=json');
-    const ip = response.data.ip;
-    res.json({ ip });
+    // Получаем IP-адрес из заголовков X-Forwarded-For или напрямую из req.ip
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    // Очищаем IP-адрес от лишних данных (например, "::ffff:")
+    const cleanIp = ip.split(',')[0].replace('::ffff:', '');
+
+    // Получаем User-Agent
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+
+    res.json({ ip: cleanIp, userAgent });
   } catch (error) {
     console.error('Ошибка при получении IP:', error.message);
     res.status(500).json({ error: 'Не удалось получить IP-адрес' });
@@ -55,11 +57,11 @@ app.get('/get-ip', async (req, res) => {
 
 // Маршрут для регистрации нового пользователя
 app.post('/register', (req, res) => {
-  const { ip, name, lastName, middleName, mathType, subjects, results } = req.body;
+  const { ip, userAgent, name, lastName, middleName, mathType, subjects, results } = req.body;
 
   db.run(
-    'INSERT INTO users (ip, name, lastName, middleName, mathType, subjects, results) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [ip, name, lastName, middleName, mathType, JSON.stringify(subjects), JSON.stringify(results)],
+    'INSERT INTO users (ip, userAgent, name, lastName, middleName, mathType, subjects, results) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [ip, userAgent, name, lastName, middleName, mathType, JSON.stringify(subjects), JSON.stringify(results)],
     function (err) {
       if (err) {
         console.error('Ошибка при сохранении данных:', err.message);
